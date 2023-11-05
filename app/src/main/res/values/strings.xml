@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">TestTask</string>
+    <string name="skip">Пропустить</string>
+    <string name="continueText">Продолжить</string>
+    <string name="number_entered_incorrectly">Номер введен некорректно</string>
+    <string name="cancel">Отмена</string>
+    <string name="skip_plate_description">Вы дейтсвительно хотите пропустит ввод ГРЗ?</string>
+    <string name="enter_grz">Введите номер государственного регистрационного знака</string>
+    <string name="skip_certificate_description">Вы дейтсвительно хотите пропустит ввод СТС?</string>
+    <string name="enter_sts">Введите номер свидетельства о регистрации транспортного средства</string>
+    <string name="skip_drive_license_description">Вы дейтсвительно хотите пропустит ввод ВУ?</string>
+    <string name="enter_vu">Введите номер водительского удостоверения</string>
+    <string name="state_registration_plate">"Государственный регистрационный знак "</string>
+    <string name="certificate_number">Номер свидетельства о регистрации транспортного средства</string>
+    <string name="driver_license_number">Номер водительского удостоверения</string>
+</resources>
