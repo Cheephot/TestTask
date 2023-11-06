@@ -5,10 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.test.task.dataStores.AutoInfoDataStore
-import com.test.task.dataStores.DriverLicenseNumberDataStore
+import com.test.task.application.formatters.ResultFormatter
+import com.test.task.application.operations.queries.GetAutoInfoQuery
+import com.test.task.application.operations.queries.GetAutoInfoQueryHandler
+import com.test.task.application.operations.queries.GetDriverLicenseNumberQuery
+import com.test.task.application.operations.queries.GetDriverLicenseNumberQueryHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -16,8 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ResultViewModel @Inject constructor(
-    private val autoInfoDataStore: AutoInfoDataStore,
-    private val driverLicenseNumberDataStore: DriverLicenseNumberDataStore
+    private val getAutoInfoQueryHandler: GetAutoInfoQueryHandler,
+    private val getDriverLicenseNumberQueryHandler: GetDriverLicenseNumberQueryHandler
 ) : ViewModel() {
     var stateRegistrationPlate by mutableStateOf<String?>(null)
         private set
@@ -28,46 +30,21 @@ class ResultViewModel @Inject constructor(
     var driverLicenseNumber by mutableStateOf<String?>(null)
         private set
 
-    var isInitializeAllVariables by mutableStateOf(false)
-        private set
-
     init {
         viewModelScope.launch {
             combine(
-                autoInfoDataStore.data,
-                driverLicenseNumberDataStore.data
+                getAutoInfoQueryHandler.handle(GetAutoInfoQuery),
+                getDriverLicenseNumberQueryHandler.handle(GetDriverLicenseNumberQuery)
             ) { autoInfo, driverLicenseNumber ->
                 autoInfo to driverLicenseNumber
             }.collectLatest {
                 stateRegistrationPlate =
-                    stateRegistrationPlateFormatter(it.first.stateRegistrationPlate)
+                    ResultFormatter.stateRegistrationPlateFormatter(it.first.stateRegistrationPlate)
 
-                certificateNumber = numberFormatter(it.first.certificateNumber)
+                certificateNumber = ResultFormatter.numberFormatter(it.first.certificateNumber)
 
-                driverLicenseNumber = numberFormatter(it.second)
-
-                isInitializeAllVariables = true
+                driverLicenseNumber = ResultFormatter.numberFormatter(it.second)
             }
-        }
-    }
-
-    private fun stateRegistrationPlateFormatter(text: String?): String? {
-        return text?.replace(Regex("(?<=\\d)(?=\\D)|(?<=\\D)(?=\\d)"), " ")
-    }
-
-    private fun numberFormatter(text: String?): String? {
-        return when {
-            text?.matches(Regex("\\d{10}")) == true -> text.replaceFirst(
-                Regex("(\\d{2})(\\d{2})(\\d{6})"),
-                "$1 $2 $3"
-            )
-
-            text?.matches(Regex("\\d{2}[А-Я]{2}\\d{6}")) == true -> text.replaceFirst(
-                Regex("(\\d{2})([А-Я]{2})(\\d{6})"),
-                "$1 $2 $3"
-            )
-
-            else -> text
         }
     }
 }

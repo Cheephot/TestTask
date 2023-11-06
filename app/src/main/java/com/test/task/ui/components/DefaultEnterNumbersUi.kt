@@ -17,12 +17,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.foresko.debts.R
+import com.test.task.R
 
 @Composable
 fun DefaultEnterNumbersUi(
     @StringRes text: Int,
-    continueHandler: () -> Unit,
+    onContinueClick: () -> Unit,
     onSkipAlertDialogStateChange: () -> Unit,
     textField: @Composable () -> Unit
 ) {
@@ -49,7 +49,7 @@ fun DefaultEnterNumbersUi(
         Spacer(modifier = Modifier.height(16.dp))
 
         NextPageButtons(
-            continueHandler = continueHandler,
+            onContinueClick = onContinueClick,
             onSkipAlertDialogStateChange = onSkipAlertDialogStateChange
         )
     }
@@ -57,7 +57,7 @@ fun DefaultEnterNumbersUi(
 
 @Composable
 private fun NextPageButtons(
-    continueHandler: () -> Unit,
+    onContinueClick: () -> Unit,
     onSkipAlertDialogStateChange: () -> Unit
 ) {
     Row(
@@ -74,7 +74,7 @@ private fun NextPageButtons(
 
         NextPageButton(
             name = R.string.continueText,
-            onClick = continueHandler
+            onClick = onContinueClick
         )
     }
 }

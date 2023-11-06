@@ -4,7 +4,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
@@ -12,14 +15,14 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.foresko.debts.R
-import com.foresko.debts.ui.destinations.destinations.ResultScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
+import com.test.task.R
 import com.test.task.ui.RootNavGraph
 import com.test.task.ui.RootNavigator
-import com.test.task.ui.components.ContinueLaunch
 import com.test.task.ui.components.DefaultEnterNumbersUi
 import com.test.task.ui.components.SkipAlertDialog
+import com.test.task.ui.destinations.destinations.ResultScreenDestination
+import com.test.task.ui.utils.showNotValidNumberToast
 
 @Composable
 @Destination
@@ -41,23 +44,37 @@ private fun DriveLicenseNumberScreen(
     viewModel: DriverLicenseNumberViewModel,
     navigateToResultScreen: () -> Unit
 ) {
-    ContinueLaunch(continueState = viewModel.continueState) { navigateToResultScreen() }
+    val context = LocalContext.current
+
+    val (skipAlertDialogState, onSkipAlertDialogStateChange) = remember { mutableStateOf(false) }
+
+    val (driverLicenseNumber, onDriverLicenseNumberChange) = remember {
+        mutableStateOf(TextFieldValue(""))
+    }
 
     SkipAlertDialog(
         text = R.string.skip_drive_license_description,
-        skipAlertDialogState = viewModel.skipAlertDialogState,
-        onSkipAlertDialogStateChange = viewModel::onSkipAlertDialogStateChange,
+        skipAlertDialogState = skipAlertDialogState,
+        onSkipAlertDialogStateChange = { onSkipAlertDialogStateChange(!skipAlertDialogState) },
         navigateTo = { navigateToResultScreen() }
     )
 
     DefaultEnterNumbersUi(
         text = R.string.enter_vu,
-        continueHandler = viewModel::continueHandler,
-        onSkipAlertDialogStateChange = viewModel::onSkipAlertDialogStateChange
+        onContinueClick = {
+            if (viewModel.validateDriverLicenseNumber(driverLicenseNumber.text)) {
+                viewModel.onDriverLicenseNumberUpdate(driverLicenseNumber.text)
+
+                navigateToResultScreen()
+            } else {
+                showNotValidNumberToast(context = context)
+            }
+        },
+        onSkipAlertDialogStateChange = { onSkipAlertDialogStateChange(!skipAlertDialogState) }
     ) {
         DriveLicenseTextField(
-            driverLicenseNumber = viewModel.driverLicenseNumber,
-            onDriverLicenseNumberChange = viewModel::onDriverLicenseNumberChange
+            driverLicenseNumber = driverLicenseNumber,
+            onDriverLicenseNumberChange = onDriverLicenseNumberChange
         )
     }
 }
@@ -68,7 +85,7 @@ private fun DriveLicenseTextField(
     onDriverLicenseNumberChange: (TextFieldValue) -> Unit
 ) {
     TextField(
-        value = driverLicenseNumber,
+        value = driverLicenseNumber.copy(driverLicenseNumber.text.uppercase()),
         onValueChange = onDriverLicenseNumberChange,
         modifier = Modifier
             .padding(horizontal = 20.dp)

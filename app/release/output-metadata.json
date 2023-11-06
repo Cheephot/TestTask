@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.foresko.debts",
+  "applicationId": "com.test.task",
   "variantName": "release",
   "elements": [
     {

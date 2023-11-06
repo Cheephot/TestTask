@@ -2,7 +2,7 @@ package com.test.task.ui.utils
 
 import android.content.Context
 import android.widget.Toast
-import com.foresko.debts.R
+import com.test.task.R
 
 fun showNotValidNumberToast(context: Context) {
     Toast.makeText(

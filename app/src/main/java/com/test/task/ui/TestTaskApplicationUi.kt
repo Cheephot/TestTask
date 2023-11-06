@@ -10,16 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
-import com.foresko.debts.ui.destinations.NavGraphs
-import com.foresko.debts.ui.destinations.destinations.CertificateNumberScreenDestination
-import com.foresko.debts.ui.destinations.destinations.DriverLicenseNumberScreenDestination
-import com.foresko.debts.ui.destinations.destinations.ResultScreenDestination
-import com.foresko.debts.ui.destinations.destinations.StateRegistrationPlateScreenDestination
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.rememberNavHostEngine
-import com.ramcosta.composedestinations.spec.Route
+import com.test.task.ui.destinations.NavGraphs
 
 @Composable
 fun TestTaskApplicationUi(
@@ -33,43 +28,21 @@ fun TestTaskApplicationUi(
         )
     }
 
-    val startDestination = determineStartDestination(
-        shouldNavigateToStateRegistrationPlateScreen = viewModel.shouldNavigateToStateRegistrationPlateScreen(),
-        shouldNavigateToCertificateNumber = viewModel.shouldNavigateToCertificateNumber(),
-        shouldNavigateToDriverLicenseNumber = viewModel.shouldNavigateToDriverLicenseNumber(),
-        shouldNavigateToResultScreen = viewModel.shouldNavigateToResultScreen()
-    )
-
     val navController = rememberNavController()
 
-    if (!viewModel.isInitializeAllVariables) return
-
-    DestinationsNavHost(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .navigationBarsPadding()
-            .statusBarsPadding(),
-        navGraph = NavGraphs.root.copy(startRoute = startDestination),
-        engine = rememberNavHostEngine(),
-        navController = navController,
-        dependenciesContainerBuilder = {
-            dependency(RootNavigator(destinationsNavigator))
-        }
-    )
-}
-
-private fun determineStartDestination(
-    shouldNavigateToStateRegistrationPlateScreen: Boolean,
-    shouldNavigateToCertificateNumber: Boolean,
-    shouldNavigateToDriverLicenseNumber: Boolean,
-    shouldNavigateToResultScreen: Boolean,
-): Route {
-    return when {
-        shouldNavigateToStateRegistrationPlateScreen -> StateRegistrationPlateScreenDestination
-        shouldNavigateToCertificateNumber -> CertificateNumberScreenDestination
-        shouldNavigateToDriverLicenseNumber -> DriverLicenseNumberScreenDestination
-        shouldNavigateToResultScreen -> ResultScreenDestination
-        else -> StateRegistrationPlateScreenDestination
+    if (viewModel.startDestination != null) {
+        DestinationsNavHost(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .navigationBarsPadding()
+                .statusBarsPadding(),
+            navGraph = NavGraphs.root.copy(startRoute = viewModel.startDestination!!),
+            engine = rememberNavHostEngine(),
+            navController = navController,
+            dependenciesContainerBuilder = {
+                dependency(RootNavigator(destinationsNavigator))
+            }
+        )
     }
 }

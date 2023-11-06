@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.foresko.debts.R
+import com.test.task.R
 import com.ramcosta.composedestinations.annotation.Destination
 import com.test.task.ui.RootNavGraph
 
@@ -28,8 +28,6 @@ import com.test.task.ui.RootNavGraph
 fun ResultScreen(
     viewModel: ResultViewModel = hiltViewModel()
 ) {
-    if (!viewModel.isInitializeAllVariables) return
-
     Column(
         modifier = Modifier
             .fillMaxSize()

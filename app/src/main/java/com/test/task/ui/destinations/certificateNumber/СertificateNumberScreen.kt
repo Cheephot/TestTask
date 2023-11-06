@@ -4,7 +4,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
@@ -12,15 +15,15 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.foresko.debts.R
-import com.foresko.debts.ui.destinations.destinations.DriverLicenseNumberScreenDestination
-import com.foresko.debts.ui.destinations.destinations.ResultScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
+import com.test.task.R
 import com.test.task.ui.RootNavGraph
 import com.test.task.ui.RootNavigator
-import com.test.task.ui.components.ContinueLaunch
 import com.test.task.ui.components.DefaultEnterNumbersUi
 import com.test.task.ui.components.SkipAlertDialog
+import com.test.task.ui.destinations.destinations.DriverLicenseNumberScreenDestination
+import com.test.task.ui.destinations.destinations.ResultScreenDestination
+import com.test.task.ui.utils.showNotValidNumberToast
 
 @Composable
 @Destination
@@ -48,18 +51,18 @@ private fun CertificateNumberScreen(
     navigateToResultScreen: () -> Unit,
     navigateToDriverLicenseNumberScreen: () -> Unit
 ) {
-    ContinueLaunch(continueState = viewModel.continueState) {
-        if (viewModel.driverLicenseNumber.isNullOrEmpty()) {
-            navigateToDriverLicenseNumberScreen()
-        } else {
-            navigateToResultScreen()
-        }
+    val context = LocalContext.current
+
+    val (skipAlertDialogState, onSkipAlertDialogStateChange) = remember { mutableStateOf(false) }
+
+    val (certificateNumber, onCertificateNumberChange) = remember {
+        mutableStateOf(TextFieldValue(""))
     }
 
     SkipAlertDialog(
         text = R.string.skip_certificate_description,
-        skipAlertDialogState = viewModel.skipAlertDialogState,
-        onSkipAlertDialogStateChange = viewModel::onSkipAlertDialogStateChange,
+        skipAlertDialogState = skipAlertDialogState,
+        onSkipAlertDialogStateChange = { onSkipAlertDialogStateChange(!skipAlertDialogState) },
         navigateTo = {
             if (viewModel.driverLicenseNumber.isNullOrEmpty()) {
                 navigateToDriverLicenseNumberScreen()
@@ -71,12 +74,24 @@ private fun CertificateNumberScreen(
 
     DefaultEnterNumbersUi(
         text = R.string.enter_sts,
-        continueHandler = viewModel::continueHandler,
-        onSkipAlertDialogStateChange = viewModel::onSkipAlertDialogStateChange
+        onContinueClick = {
+            if (viewModel.validateCertificateNumber(certificateNumber.text)) {
+                viewModel.onAutoInfoUpdate(certificateNumber.text)
+
+                if (viewModel.driverLicenseNumber.isNullOrEmpty()) {
+                    navigateToDriverLicenseNumberScreen()
+                } else {
+                    navigateToResultScreen()
+                }
+            } else {
+                showNotValidNumberToast(context = context)
+            }
+        },
+        onSkipAlertDialogStateChange = { onSkipAlertDialogStateChange(!skipAlertDialogState) }
     ) {
         CertificateTextField(
-            certificateNumber = viewModel.certificateNumber,
-            onCertificateNumberChange = viewModel::onCertificateNumberChange
+            certificateNumber = certificateNumber,
+            onCertificateNumberChange = onCertificateNumberChange
         )
     }
 }
@@ -87,7 +102,7 @@ private fun CertificateTextField(
     onCertificateNumberChange: (TextFieldValue) -> Unit
 ) {
     TextField(
-        value = certificateNumber,
+        value = certificateNumber.copy(text = certificateNumber.text.uppercase()),
         onValueChange = onCertificateNumberChange,
         modifier = Modifier
             .padding(horizontal = 20.dp)
